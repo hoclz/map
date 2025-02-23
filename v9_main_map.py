@@ -16,7 +16,6 @@ import sys
 PARAM_YEAR = int(sys.argv[1])  # Year input from Flask
 PARAM_RACE = sys.argv[2]  # Race input from Flask
 
-
 # -------------------------------------------------------------------------
 # 1) PARAMETERS
 # -------------------------------------------------------------------------
@@ -207,7 +206,6 @@ region_colors = {
     "COOK": (255/255, 255/255, 255/255),
 }
 
-
 illinois["color"] = illinois["Region"].map(region_colors)
 
 region_labels = {
@@ -394,6 +392,7 @@ def draw_complete_diagram(ax, position):
     )
     if PARAM_RACE.upper() in diagram_title_obj.get_text().upper():
         diagram_title_obj.set_bbox(dict(facecolor="yellow", alpha=0.8, edgecolor="none"))
+
 def plot_illinois_map(fig_width, fig_height):
     global fig
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
@@ -454,7 +453,7 @@ def plot_illinois_map(fig_width, fig_height):
     )
 
     # TABLE (#4) from table_data (already sorted)
-    table_ax = fig.add_axes([0.28, 0.38, 0.12, 0.4])  #  adjusting the width (3rd) value will increase the fontsize too
+    table_ax = fig.add_axes([0.28, 0.38, 0.12, 0.4])  # adjusting the width (3rd) value will increase the font size too
     table_ax.axis("off")
     tab = Table(table_ax, bbox=[0, 0, 1, 1])
 
@@ -524,31 +523,29 @@ def plot_illinois_map(fig_width, fig_height):
     # Define dynamic color for the second part of the title
     race_colors = {
         "NHB": "black",      # Non-Hispanic Black
-        "NHW": "black",       # Non-Hispanic White
+        "NHW": "black",      # Non-Hispanic White
         "NHA": "black",      # Non-Hispanic Asian
-        "HISP": "black"        # Hispanic
+        "HISP": "black"      # Hispanic
     }
     title_color = race_colors.get(PARAM_RACE.upper(), "black")
-    
+
     # Ensure proper spacing between words
     formatted_full_text = full_text.replace(" ", " ")  # Non-breaking spaces
-    
+
     # Define title components
     title_part1 = "Regional Asthma Age-Adjusted Rates Per 100,000 HOSPITALIZATION Discharges for"
     title_part2 = f"{formatted_full_text} ({PARAM_RACE.upper()})"
     title_part3 = f"Population, {selected_year}"
 
-    
     # Ensure spaces appear correctly
     title_str = (
         f"{title_part1} "
         f"$\\mathbf{{ {formatted_full_text} \\ ({PARAM_RACE.upper()}) }}$ "  # Explicit spacing
         f"{title_part3}"
     )
-    
+
     # Apply the title with adjusted position
     ax.set_title(title_str, fontsize=12, color=title_color, fontweight="normal", x=0.54, y=1.05)
-
 
     ax.set_aspect('equal', adjustable='datalim')
     ax.set_axis_off()
@@ -563,15 +560,17 @@ def plot_illinois_map(fig_width, fig_height):
 # -------------------------------------------------------------------------
 plot_illinois_map(fig_width=14, fig_height=8)
 
-# Ensure the directory exists
+# -------------------------------------------------------------------------
+# 8) SAVE TO static/maps/
+# -------------------------------------------------------------------------
 OUTPUT_FOLDER = "static/maps"
 if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)
 
-# Define the file path
+# Build the final image path
 map_filename = f"{OUTPUT_FOLDER}/{PARAM_RACE}_{PARAM_YEAR}.png"
 
-# Save the image
+# Save again to static/maps
 plt.savefig(map_filename, dpi=100)
 plt.close()  # Ensure Matplotlib releases memory
 
