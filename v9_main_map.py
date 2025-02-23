@@ -1,3 +1,12 @@
+# Set up the page configuration FIRST
+import streamlit as st
+st.set_page_config(
+    page_title="Illinois Asthma Hospitalization",
+    layout="centered",
+    page_icon="📊"
+)
+
+# Now import other modules
 import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,7 +18,6 @@ from shapely.ops import unary_union
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.patches as patches
 import numpy as np
-import streamlit as st
 import os
 
 # Set Matplotlib backend
@@ -21,6 +29,7 @@ CSV_PATH = "Asthma_regional_data.csv"
 COUNTY_TYPE_CSV = "county_type.csv"
 TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
 IDPH_LOGO_PATH = "IDPH_logo.png"
+ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
 
 st.write("File Existence Check:")
 st.write(f"CSV_PATH: {os.path.exists(CSV_PATH)}")
@@ -369,5 +378,10 @@ def plot_illinois_map():
 # -------------------------------------------------------------------------
 # 7) RENDER IN STREAMLIT
 # -------------------------------------------------------------------------
-    st.pyplot(fig)
-    plt.close()
+def main():
+    st.title("Illinois Asthma Hospitalization Dashboard")
+    # Add your Streamlit components here
+    plot_illinois_map()
+
+if __name__ == "__main__":
+    main()
