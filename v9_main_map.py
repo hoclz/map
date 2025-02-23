@@ -20,8 +20,8 @@ PARAM_RACE = sys.argv[2]  # Race input from Flask
 # -------------------------------------------------------------------------
 # 1) PARAMETERS
 # -------------------------------------------------------------------------
-CSV_PATH = r"F:\j45\userform for numerator\dashboard\Asthma_regional_data.csv"
-COUNTY_TYPE_CSV = r"F:\j45\userform for numerator\county_type.csv"
+CSV_PATH = "Asthma_regional_data.csv"
+COUNTY_TYPE_CSV = "county_type.csv"
 ILLINOIS_GEOJSON_URL = (
     "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
 )
@@ -30,7 +30,7 @@ ILLINOIS_GEOJSON_URL = (
 # PARAM_RACE = "NHA"   # Must be one of: "NHB", "NHW", "NHA", "HISP"
 
 # Path to the CSV containing the TOTAL counts per race/year
-TOTAL_COUNT_CSV = r"F:\j45\userform for numerator\dashboard\total_count_per_race_ethnicity.csv"
+TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"  
 
 # Define a dictionary of high-contrast colors for the dynamic line color
 dynamic_line_color = {
