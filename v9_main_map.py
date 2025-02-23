@@ -11,6 +11,13 @@ import matplotlib.patches as patches
 import numpy as np
 import streamlit as st
 
+# Set up the page configuration FIRST
+st.set_page_config(
+    page_title="Illinois Asthma Hospitalization",
+    layout="centered",
+    page_icon="📊"
+)
+
 # -------------------------------------------------------------------------
 # 1) PARAMETERS (Updated for Streamlit)
 # -------------------------------------------------------------------------
@@ -22,7 +29,7 @@ def plot_illinois_map():
     COUNTY_TYPE_CSV = "county_type.csv"
     ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
     TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
-    IDPH_LOGO_PATH = "static/maps/IDPH_logo.png"
+    IDPH_LOGO_PATH = "static/maps/IDPH_logo.png"  # Ensure this path is correct
 
     dynamic_line_color = {
         "NHB": "#E41A1C", "NHW": "#377EB8",
@@ -164,7 +171,7 @@ def plot_illinois_map():
     sources_text = f"""Sources
 + Population: Census Data, {PARAM_YEAR}
 + Asthma Count: Hospital Discharge Data, {PARAM_YEAR}
-#NAME?
++ Urban/Rural: Illinois Department of Public Health (IDPH)
 + Region: https://graphics.chicagotribune.com/
   illinois-tier-mitigations/map-blurb.html"""
 
@@ -357,3 +364,14 @@ def plot_illinois_map():
 # -------------------------------------------------------------------------
     st.pyplot(fig)
     plt.close()
+
+# -------------------------------------------------------------------------
+# 8) RUN THE PLOT
+# -------------------------------------------------------------------------
+def main():
+    st.title("Illinois Asthma Hospitalization Dashboard")
+    # Add your Streamlit components here
+    plot_illinois_map()
+
+if __name__ == "__main__":
+    main()
