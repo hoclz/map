@@ -22,7 +22,7 @@ def plot_illinois_map():
     COUNTY_TYPE_CSV = "county_type.csv"
     ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
     TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
-    IDPH_LOGO_PATH = "static/IDPH_logo.png"
+    IDPH_LOGO_PATH = "static/maps/IDPH_logo.png"
 
     dynamic_line_color = {
         "NHB": "#E41A1C", "NHW": "#377EB8",
