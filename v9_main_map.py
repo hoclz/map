@@ -31,6 +31,7 @@ TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
 IDPH_LOGO_PATH = "IDPH_logo.png"
 ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
 
+# File existence check (after st.set_page_config)
 st.write("File Existence Check:")
 st.write(f"CSV_PATH: {os.path.exists(CSV_PATH)}")
 st.write(f"COUNTY_TYPE_CSV: {os.path.exists(COUNTY_TYPE_CSV)}")
