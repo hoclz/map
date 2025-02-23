@@ -1,3 +1,12 @@
+# Set up the page configuration FIRST
+import streamlit as st
+st.set_page_config(
+    page_title="Illinois Asthma Hospitalization",
+    layout="centered",
+    page_icon="📊"
+)
+
+# Now import other modules
 import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,14 +18,25 @@ from shapely.ops import unary_union
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.patches as patches
 import numpy as np
-import streamlit as st
+import os
 
-# Set up the page configuration FIRST
-st.set_page_config(
-    page_title="Illinois Asthma Hospitalization",
-    layout="centered",
-    page_icon="📊"
-)
+# Set Matplotlib backend
+import matplotlib
+matplotlib.use('Agg')
+
+# Debugging: Check file paths
+CSV_PATH = "Asthma_regional_data.csv"
+COUNTY_TYPE_CSV = "county_type.csv"
+TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
+IDPH_LOGO_PATH = "static/maps/IDPH_logo.png"  # Ensure this path is correct
+ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
+
+# File existence check (after st.set_page_config)
+st.write("File Existence Check:")
+st.write(f"CSV_PATH: {os.path.exists(CSV_PATH)}")
+st.write(f"COUNTY_TYPE_CSV: {os.path.exists(COUNTY_TYPE_CSV)}")
+st.write(f"TOTAL_COUNT_CSV: {os.path.exists(TOTAL_COUNT_CSV)}")
+st.write(f"IDPH_LOGO_PATH: {os.path.exists(IDPH_LOGO_PATH)}")
 
 # -------------------------------------------------------------------------
 # 1) PARAMETERS (Updated for Streamlit)
@@ -24,18 +44,16 @@ st.set_page_config(
 def plot_illinois_map():
     PARAM_YEAR = st.session_state.selected_year
     PARAM_RACE = st.session_state.selected_race
-    
-    CSV_PATH = "Asthma_regional_data.csv"
-    COUNTY_TYPE_CSV = "county_type.csv"
-    ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
-    TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
-    IDPH_LOGO_PATH = "static/maps/IDPH_logo.png"  # Ensure this path is correct
+
+    st.write(f"Selected Year: {PARAM_YEAR}")
+    st.write(f"Selected Race: {PARAM_RACE}")
 
     dynamic_line_color = {
         "NHB": "#E41A1C", "NHW": "#377EB8",
         "NHA": "#4DAF4A", "HISP": "#984EA3"
     }
     LINE_COLOR = dynamic_line_color[PARAM_RACE.upper()]
+
 
 # -------------------------------------------------------------------------
 # 2) READ & PREPARE THE ASTHMA DATA
