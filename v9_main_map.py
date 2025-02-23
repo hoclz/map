@@ -1,12 +1,3 @@
-# Set up the page configuration FIRST
-import streamlit as st
-st.set_page_config(
-    page_title="Illinois Asthma Hospitalization",
-    layout="centered",
-    page_icon="📊"
-)
-
-# Now import other modules
 import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,25 +9,7 @@ from shapely.ops import unary_union
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.patches as patches
 import numpy as np
-import os
-
-# Set Matplotlib backend
-import matplotlib
-matplotlib.use('Agg')
-
-# Debugging: Check file paths
-CSV_PATH = "Asthma_regional_data.csv"
-COUNTY_TYPE_CSV = "county_type.csv"
-TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
-IDPH_LOGO_PATH = "IDPH_logo.png"
-ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
-
-# File existence check (after st.set_page_config)
-st.write("File Existence Check:")
-st.write(f"CSV_PATH: {os.path.exists(CSV_PATH)}")
-st.write(f"COUNTY_TYPE_CSV: {os.path.exists(COUNTY_TYPE_CSV)}")
-st.write(f"TOTAL_COUNT_CSV: {os.path.exists(TOTAL_COUNT_CSV)}")
-st.write(f"IDPH_LOGO_PATH: {os.path.exists(IDPH_LOGO_PATH)}")
+import streamlit as st
 
 # -------------------------------------------------------------------------
 # 1) PARAMETERS (Updated for Streamlit)
@@ -44,9 +17,12 @@ st.write(f"IDPH_LOGO_PATH: {os.path.exists(IDPH_LOGO_PATH)}")
 def plot_illinois_map():
     PARAM_YEAR = st.session_state.selected_year
     PARAM_RACE = st.session_state.selected_race
-
-    st.write(f"Selected Year: {PARAM_YEAR}")
-    st.write(f"Selected Race: {PARAM_RACE}")
+    
+    CSV_PATH = "Asthma_regional_data.csv"
+    COUNTY_TYPE_CSV = "county_type.csv"
+    ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
+    TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
+    IDPH_LOGO_PATH = "static/maps/IDPH_logo.png"
 
     dynamic_line_color = {
         "NHB": "#E41A1C", "NHW": "#377EB8",
@@ -188,7 +164,7 @@ def plot_illinois_map():
     sources_text = f"""Sources
 + Population: Census Data, {PARAM_YEAR}
 + Asthma Count: Hospital Discharge Data, {PARAM_YEAR}
-+ Urban/Rural: Illinois Department of Public Health (IDPH)
+#NAME?
 + Region: https://graphics.chicagotribune.com/
   illinois-tier-mitigations/map-blurb.html"""
 
@@ -379,10 +355,5 @@ def plot_illinois_map():
 # -------------------------------------------------------------------------
 # 7) RENDER IN STREAMLIT
 # -------------------------------------------------------------------------
-def main():
-    st.title("Illinois Asthma Hospitalization Dashboard")
-    # Add your Streamlit components here
-    plot_illinois_map()
-
-if __name__ == "__main__":
-    main()
+    st.pyplot(fig)
+    plt.close()
