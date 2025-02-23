@@ -10,6 +10,23 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.patches as patches
 import numpy as np
 import streamlit as st
+import os
+
+# Set Matplotlib backend
+import matplotlib
+matplotlib.use('Agg')
+
+# Debugging: Check file paths
+CSV_PATH = "Asthma_regional_data.csv"
+COUNTY_TYPE_CSV = "county_type.csv"
+TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
+IDPH_LOGO_PATH = "IDPH_logo.png"
+
+st.write("File Existence Check:")
+st.write(f"CSV_PATH: {os.path.exists(CSV_PATH)}")
+st.write(f"COUNTY_TYPE_CSV: {os.path.exists(COUNTY_TYPE_CSV)}")
+st.write(f"TOTAL_COUNT_CSV: {os.path.exists(TOTAL_COUNT_CSV)}")
+st.write(f"IDPH_LOGO_PATH: {os.path.exists(IDPH_LOGO_PATH)}")
 
 # -------------------------------------------------------------------------
 # 1) PARAMETERS (Updated for Streamlit)
@@ -17,12 +34,9 @@ import streamlit as st
 def plot_illinois_map():
     PARAM_YEAR = st.session_state.selected_year
     PARAM_RACE = st.session_state.selected_race
-    
-    CSV_PATH = "Asthma_regional_data.csv"
-    COUNTY_TYPE_CSV = "county_type.csv"
-    ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
-    TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
-    IDPH_LOGO_PATH = "static/maps/IDPH_logo.png"
+
+    st.write(f"Selected Year: {PARAM_YEAR}")
+    st.write(f"Selected Race: {PARAM_RACE}")
 
     dynamic_line_color = {
         "NHB": "#E41A1C", "NHW": "#377EB8",
