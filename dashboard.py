@@ -1,14 +1,14 @@
-import streamlit as st
+import streamlit as st 
 from v9_main_map import plot_illinois_map
 
-# Set up the page configuration
+# Set up the page configuration (using a wide layout)
 st.set_page_config(
     page_title="Illinois Asthma Hospitalization",
-    layout="centered",  # This can cause narrower pages
+    layout="wide",  # Changed from 'centered' to 'wide'
     page_icon="📊"
 )
 
-# Custom CSS for better UI
+# Custom CSS for better UI remains the same
 st.markdown(
     """
     <style>
@@ -51,41 +51,43 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Title and subtitle
-st.markdown('<p class="title">📊 Illinois Asthma Hospitalization Rates</p>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Select Year & Race to View the Updated Map</p>', unsafe_allow_html=True)
-
-# Organizing dropdowns in two columns for better layout
-col1, col2 = st.columns([1, 1])
-
-with col1:
-    # Convert to integer for the map function
-    year = st.selectbox(
-        "📅 Select Year",
-        options=[2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
-        key="selected_year"
-    )
+# Group dropdowns and map in one container for a tighter layout
+with st.container():
+    # Title and subtitle at the top of the container
+    st.markdown('<p class="title">📊 Illinois Asthma Hospitalization Rates</p>', unsafe_allow_html=True)
+    st.markdown('<p class="subtitle">Select Year & Race to View the Updated Map</p>', unsafe_allow_html=True)
     
-with col2:
-    race = st.selectbox(
-        "🎨 Select Race",
-        options=["NHB", "NHW", "NHA", "HISP"],
-        format_func=lambda x: {
-            "NHB": "Non-Hispanic Black",
-            "NHW": "Non-Hispanic White",
-            "NHA": "Non-Hispanic Asian",
-            "HISP": "Hispanic"
-        }[x],
-        key="selected_race"
-    )
+    # Organize dropdowns in two columns
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        # Convert to integer for the map function
+        year = st.selectbox(
+            "📅 Select Year",
+            options=[2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+            key="selected_year"
+        )
+    
+    with col2:
+        race = st.selectbox(
+            "🎨 Select Race",
+            options=["NHB", "NHW", "NHA", "HISP"],
+            format_func=lambda x: {
+                "NHB": "Non-Hispanic Black",
+                "NHW": "Non-Hispanic White",
+                "NHA": "Non-Hispanic Asian",
+                "HISP": "Hispanic"
+            }[x],
+            key="selected_race"
+        )
+    
+    # Display the map visualization immediately below the dropdowns
+    try:
+        plot_illinois_map()
+    except Exception as e:
+        st.error(f"Error generating map: {str(e)}")
 
-# Display the map visualization
-try:
-    plot_illinois_map()
-except Exception as e:
-    st.error(f"Error generating map: {str(e)}")
-
-# Footer
+# Footer (can remain outside the container)
 st.markdown(
     '<div class="footer">Developed by hoclz | Powered by Streamlit 🚀</div>',
     unsafe_allow_html=True
