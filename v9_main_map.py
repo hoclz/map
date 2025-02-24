@@ -160,16 +160,16 @@ def plot_illinois_map():
     illinois["color"] = illinois["Region"].map(region_colors)
 
     region_labels = {
-        "NORTH": (250000, 4600000, 1),
-        "NORTH-CENTRAL": (350000, 4400000, 2),
-        "WEST-CENTRAL": (200000, 4200000, 3),
-        "METRO EAST": (700000, 4100000, 4),
-        "SOUTHERN": (500000, 3900000, 5),
-        "EAST-CENTRAL": (500000, 4400000, 6),
-        "SOUTH SUBURBAN": (800000, 4500000, 7),
-        "WEST SUBURBAN": (900000, 4600000, 8),
-        "NORTH SUBURBAN": (950000, 4700000, 9),
-        "COOK": (1050000, 4600000, 10)
+        "NORTH": (250000, 4600000),
+        "NORTH-CENTRAL": (350000, 4400000),
+        "WEST-CENTRAL": (200000, 4200000),
+        "METRO EAST": (700000, 4100000),
+        "SOUTHERN": (500000, 3900000),
+        "EAST-CENTRAL": (500000, 4400000),
+        "SOUTH SUBURBAN": (800000, 4500000),
+        "WEST SUBURBAN": (900000, 4600000),
+        "NORTH SUBURBAN": (950000, 4700000),
+        "COOK": (1050000, 4600000)
     }
 
     # Updated sources text (removed stray placeholder)
