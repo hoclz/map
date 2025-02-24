@@ -10,6 +10,7 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.patches as patches
 import numpy as np
 import streamlit as st
+import os
 
 # -------------------------------------------------------------------------
 # 1) PARAMETERS (Updated for Streamlit)
@@ -24,8 +25,7 @@ def plot_illinois_map():
     COUNTY_TYPE_CSV = "county_type.csv"
     ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
     TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
-
-    # If you're deploying to Streamlit Cloud, consider using a URL or a base64 image:
+    # For Streamlit Cloud deployment consider using a hosted URL; local paths may fail
     IDPH_LOGO_PATH = "static/maps/IDPH_logo.png"
 
     # Define color for each race group
@@ -172,7 +172,7 @@ def plot_illinois_map():
         "COOK": (1050000, 4600000, 10)
     }
 
-    # Updated sources text (removed #NAME?)
+    # Updated sources text (removed stray placeholder)
     sources_text = f"""Sources
 + Population: Census Data, {PARAM_YEAR}
 + Asthma Count: Hospital Discharge Data, {PARAM_YEAR}
@@ -189,7 +189,6 @@ def plot_illinois_map():
         ax.add_artist(ab)
 
     def add_illinois_outline(ax, boundary_gdf, position, zoom):
-        # We'll add an inset axis to show the Illinois boundary highlight
         inset_ax = fig.add_axes([position[0], position[1], zoom, zoom])
         boundary_gdf.boundary.plot(ax=inset_ax, linewidth=2, edgecolor=LINE_COLOR)
         inset_ax.axis('off')
@@ -209,7 +208,6 @@ def plot_illinois_map():
         ax.plot([cord_x, contact_x], [cord_y, contact_y], color=LINE_COLOR, linewidth=1)
 
     def draw_complete_diagram(ax, position):
-        # Diagram for statewide rates by race
         diagram_ax = fig.add_axes(position)
         diagram_ax.axis("off")
         edge_length_factor = 0.8
@@ -230,25 +228,21 @@ def plot_illinois_map():
         apex_x, apex_y = 0, y_offset
         vertical_x, vertical_y = apex_x, apex_y - vertical_line_length
 
-        # Draw funnel-like shape
         diagram_ax.plot([x_left, apex_x], [y_left, apex_y], color=LINE_COLOR, linewidth=2)
         diagram_ax.plot([apex_x, x_right], [apex_y, y_right], color=LINE_COLOR, linewidth=2)
         diagram_ax.plot([vertical_x, vertical_x], [apex_y, vertical_y], color=LINE_COLOR, linewidth=2)
 
-        # Add the small "fan" lines at the bottom
         for i in range(fan_count):
             angle_offset = -fan_angle / 2 + i * (fan_angle / (fan_count - 1))
             x_fan = vertical_x + 0.3 * np.sin(np.radians(angle_offset))
             y_fan = vertical_y - 0.3 * np.cos(np.radians(angle_offset))
             diagram_ax.plot([vertical_x, x_fan], [vertical_y, y_fan], color=LINE_COLOR, linewidth=1)
 
-        # Extract circle values
         val_nhb = circle_dict["NHB"]
         val_nhw = circle_dict["NHW"]
         val_nha = circle_dict["NHA"]
         val_hisp = circle_dict["HISP"]
 
-        # Place circles and labels
         draw_circle_with_cord(
             diagram_ax,
             (x_left+apex_x)/2,
@@ -294,7 +288,6 @@ def plot_illinois_map():
             PARAM_RACE=="HISP"
         )
 
-        # Legend text
         legend_items = {
             "NHA": "Non-Hispanic Asian",
             "NHB": "Non-Hispanic Black",
@@ -303,7 +296,7 @@ def plot_illinois_map():
         }
         y_legend_start = vertical_y + 0.6
         line_spacing = 0.3
-
+        
         for i, (rc, desc) in enumerate(legend_items.items()):
             txt_line = f"{rc} = {desc}"
             diagram_ax.text(
@@ -312,15 +305,13 @@ def plot_illinois_map():
                 txt_line,
                 fontsize=9,
                 ha="center",
-                fontweight="bold" if rc == PARAM_RACE else "normal"
+                fontweight="bold" if rc==PARAM_RACE else "normal"
             )
 
-        # Diagram bounds
         diagram_ax.set_xlim(-length*scale_factor, length*scale_factor)
         diagram_ax.set_ylim(-length*scale_factor, (y_offset+length)*scale_factor)
         diagram_ax.set_aspect('equal')
 
-        # Title for funnel diagram
         title_text = f"Statewide Asthma Age-Adjusted Rate Per 100,000\nby Race/Ethnicity ({selected_year})"
         title = diagram_ax.set_title(title_text, fontsize=9, y=1.05)
         if PARAM_RACE in title.get_text():
@@ -329,14 +320,14 @@ def plot_illinois_map():
     # -------------------------------------------------------------------------
     # 6) PLOT ILLINOIS MAP
     # -------------------------------------------------------------------------
-    # CHANGED: Increased figsize to make the map more visible
+    # CHANGED: Increased figsize to improve visibility
     fig, ax = plt.subplots(figsize=(16, 10))
 
     # Map halo
     halo = unary_union(illinois.geometry).buffer(5000)
     gpd.GeoSeries([halo]).plot(ax=ax, color=LINE_COLOR, edgecolor='none')
 
-    # Main map fill
+    # Main map
     illinois.plot(ax=ax, color=illinois["color"], edgecolor='darkgray')
     illinois.boundary.plot(ax=ax, edgecolor='gray', linewidth=1)
 
@@ -350,7 +341,7 @@ def plot_illinois_map():
         elif row["Urban_Rural"] == "Rural":
             ax.scatter(cx, cy - marker_offset, color='magenta', s=40, marker='*')
 
-    # Region labels (numbers in each region)
+    # Region labels
     for region_name, (x, y, label) in region_labels.items():
         ax.text(
             x, y, str(label),
@@ -359,7 +350,7 @@ def plot_illinois_map():
             path_effects=[withStroke(linewidth=3, foreground="black")]
         )
 
-    # Region legend
+    # Legends
     region_legend = ax.legend(
         handles=[Patch(facecolor=c, edgecolor='black', label=l) for l, c in region_colors.items()],
         loc='upper left', bbox_to_anchor=(0.75, 0.90), title='Regions',
@@ -367,7 +358,6 @@ def plot_illinois_map():
     )
     ax.add_artist(region_legend)
 
-    # County Type legend
     county_legend = ax.legend(
         handles=[
             Line2D([0], [0], marker='o', color='w', label='Urban',
@@ -379,7 +369,7 @@ def plot_illinois_map():
         fontsize=10, title_fontsize=10
     )
 
-    # Data table (side box)
+    # Data table
     table_ax = fig.add_axes([0.28, 0.38, 0.12, 0.4])
     table_ax.axis("off")
     tab = Table(table_ax, bbox=[0, 0, 1, 1])
@@ -400,10 +390,10 @@ def plot_illinois_map():
         fontsize=9, va="top", ha="left", linespacing=1.5
     )
 
-    # IDPH logo (local path)
+    # IDPH logo
     add_image(ax, IDPH_LOGO_PATH, (0.35, 0.07), 0.25)
 
-    # Small inset outline of Illinois
+    # Illinois outline inset
     add_illinois_outline(ax, state_boundary, (0.63, 0.65), 0.057)
 
     # Total count text
@@ -413,7 +403,7 @@ def plot_illinois_map():
         fontsize=9, color='black', ha='left', va='center'
     )
 
-    # Funnel diagram (statewide rates)
+    # Funnel diagram
     draw_complete_diagram(ax, [0.64, 0.03, 0.15, 0.5])
 
     # Main title
@@ -433,6 +423,31 @@ def plot_illinois_map():
     # -------------------------------------------------------------------------
     # 7) RENDER IN STREAMLIT
     # -------------------------------------------------------------------------
-    # CHANGED: Use container width + close the figure
     st.pyplot(fig, use_container_width=True)
     plt.close(fig)
+
+# -------------------------------------------------------------------------
+# Command-line execution: Save the map as a PNG file for external use (e.g., by Flask)
+# -------------------------------------------------------------------------
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) == 3:
+        year = int(sys.argv[1])
+        race = sys.argv[2].upper()
+        # If st.session_state is not available, create a dummy one
+        if not hasattr(st, 'session_state'):
+            st.session_state = {}
+        st.session_state['selected_year'] = year
+        st.session_state['selected_race'] = race
+
+        # Generate the plot
+        plot_illinois_map()
+        # Ensure output folder exists
+        output_folder = os.path.join(os.getcwd(), "static/maps")
+        os.makedirs(output_folder, exist_ok=True)
+        output_file = os.path.join(output_folder, f"{race}_{year}.png")
+        # Save the figure to the file for Flask to serve
+        plt.savefig(output_file, bbox_inches="tight")
+        plt.close()
+    else:
+        print("Expected 2 arguments: year and race")
