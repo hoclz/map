@@ -375,7 +375,7 @@ def plot_illinois_map():
             Line2D([0], [0], marker='*', color='w', label='Rural',
                    markerfacecolor='magenta', markersize=12)
         ],
-        loc='upper right', bbox_to_anchor=(0.75, 0.90), title='County Type',
+        loc='upper right', bbox_to_anchor=(1.3, 0.90), title='County Type',
         fontsize=10, title_fontsize=10
     )
 
