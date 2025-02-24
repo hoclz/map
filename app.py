@@ -24,7 +24,7 @@ def update_map():
     if os.path.exists(map_path):
         os.remove(map_path)
 
-    # Run the main map script
+    # Run the main map script with parameters
     try:
         result = subprocess.run(
             ["python", MAP_GENERATION_SCRIPT, str(year), race],
