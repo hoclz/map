@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 
 # Set up the page configuration
 st.set_page_config(
@@ -57,13 +58,22 @@ with col1:
     year = st.selectbox("📅 Select Year", ["2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"])
     
 with col2:
-    race = st.selectbox("🎨 Select Race", ["NHA", "NHB", "NHW", "HISP"])
+    race_options = {"NHA": "Non-Hispanic Asian", "NHB": "Non-Hispanic Black", "NHW": "Non-Hispanic White", "HISP": "Hispanic"}
+    race = st.selectbox("🎨 Select Race", list(race_options.keys()), format_func=lambda x: race_options[x])
 
 # API request to Flask for the latest map
 map_url = f"http://127.0.0.1:5000/update_map?year={year}&race={race}"
 
-# Display the updated map dynamically
-st.image(map_url, caption=f"📌 Asthma Hospitalization for {race} in {year}", use_container_width=True)
+# Try fetching the map
+with st.spinner("🔄 Updating Map..."):
+    try:
+        response = requests.get(map_url)
+        if response.status_code == 200:
+            st.image(map_url, caption=f"📌 Asthma Hospitalization for {race_options[race]} in {year}", use_column_width=True)
+        else:
+            st.warning(f"⚠️ Unable to fetch map for {race_options[race]} in {year}. Please try again later.")
+    except requests.exceptions.RequestException as e:
+        st.error(f"❌ Error connecting to API: {e}")
 
 # Footer
 st.markdown('<div class="footer">Developed by hoclz | Powered by Streamlit 🚀</div>', unsafe_allow_html=True)
