@@ -50,20 +50,31 @@ st.markdown(
 st.markdown('<p class="title">📊 Illinois Asthma Hospitalization Rates</p>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Select Year & Race to View the Updated Map</p>', unsafe_allow_html=True)
 
+# Race dictionary with full names
+race_dict = {
+    "NHA": "Non-Hispanic Asian",
+    "NHB": "Non-Hispanic Black",
+    "NHW": "Non-Hispanic White",
+    "HISP": "Hispanic"
+}
+
 # Organizing dropdowns in two columns for better layout
 col1, col2 = st.columns([1, 1])
 
 with col1:
     year = st.selectbox("📅 Select Year", ["2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"])
-    
+
 with col2:
-    race = st.selectbox("🎨 Select Race", ["NHA", "NHB", "NHW", "HISP"])
+    selected_race_label = st.selectbox("🎨 Select Race", list(race_dict.values()))
+    
+    # Get the race code (NHA, NHB, NHW, HISP) based on selection
+    race_code = next(code for code, label in race_dict.items() if label == selected_race_label)
 
 # API request to Flask for the latest map
-map_url = f"http://127.0.0.1:5000/update_map?year={year}&race={race}"
+map_url = f"http://127.0.0.1:5000/update_map?year={year}&race={race_code}"
 
 # Display the updated map dynamically
-st.image(map_url, caption=f"📌 Asthma Hospitalization for {race} in {year}", use_container_width=True)
+st.image(map_url, caption=f"📌 Asthma Hospitalization for {selected_race_label} in {year}", use_container_width=True)
 
 # Footer
 st.markdown('<div class="footer">Developed by hoclz | Powered by Streamlit 🚀</div>', unsafe_allow_html=True)
