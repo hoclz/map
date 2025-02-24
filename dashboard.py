@@ -4,7 +4,7 @@ from v9_main_map import plot_illinois_map
 # Set up the page configuration
 st.set_page_config(
     page_title="Illinois Asthma Hospitalization",
-    layout="wide",
+    layout="centered",  # This can cause narrower pages
     page_icon="📊"
 )
 
