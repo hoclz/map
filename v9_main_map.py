@@ -392,7 +392,7 @@ def plot_illinois_map():
         cell.set_text_props(fontweight='bold' if i == 0 else 'normal')
 
     # Sources text
-    text_ax = fig.add_axes([0.277, 0.125, 0.22, 0.2])
+    text_ax = fig.add_axes([0.237, 0.125, 0.22, 0.2])
     text_ax.axis("off")
     text_ax.text(
         0, 1, sources_text,
