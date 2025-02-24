@@ -58,3 +58,8 @@ st.image(map_url, caption=f"📌 Asthma Hospitalization for {race} in {year}", u
 
 # Footer
 st.markdown('<div class="footer">Developed by hoclz | Powered by Streamlit 🚀</div>', unsafe_allow_html=True)
+
+
+
+https://github.com/hoclz/map.git
+https://share.streamlit.io/
