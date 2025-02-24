@@ -4,14 +4,21 @@ from v9_main_map import plot_illinois_map
 # Set up the page configuration (using a wide layout)
 st.set_page_config(
     page_title="Illinois Asthma Hospitalization",
-    layout="wide",  # Changed from 'centered' to 'wide'
+    layout="wide",  # Using wide layout to get full horizontal space, but we will restrict the content width
     page_icon="📊"
 )
 
-# Custom CSS for better UI remains the same
+# Custom CSS for better UI, including a max-width for the main container
 st.markdown(
     """
     <style>
+        /* Restrict the main content container to a max-width */
+        .reportview-container .main .block-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
         .title {
             text-align: center;
             font-size: 32px;
