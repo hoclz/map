@@ -159,7 +159,14 @@ def plot_illinois_map():
         illinois.loc[illinois["name"].isin(county_list), "Region"] = region_name
     illinois["color"] = illinois["Region"].map(region_colors)
 
-    # Define region_labels but do not draw them (to remove weird numbers)
+    # Updated sources text (ensure it is defined)
+    sources_text = f"""Sources
++ Population: Census Data, {PARAM_YEAR}
++ Asthma Count: Hospital Discharge Data, {PARAM_YEAR}
++ Region: https://graphics.chicagotribune.com/
+  illinois-tier-mitigations/map-blurb.html"""
+
+    # Define region_labels (we still define them but do not draw them)
     region_labels = {
         "NORTH": (250000, 4600000, 1),
         "NORTH-CENTRAL": (350000, 4400000, 2),
@@ -173,7 +180,7 @@ def plot_illinois_map():
         "COOK": (1050000, 4600000, 10)
     }
 
-    # Comment out the loop that draws region labels to remove the weird numbers
+    # Comment out the loop that draws region labels to remove the unwanted numbers
     # for region_name, (x, y, label) in region_labels.items():
     #     ax.text(
     #         x, y, str(label),
