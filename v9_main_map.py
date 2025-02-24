@@ -375,7 +375,7 @@ def plot_illinois_map():
             Line2D([0], [0], marker='*', color='w', label='Rural',
                    markerfacecolor='magenta', markersize=12)
         ],
-        loc='upper right', bbox_to_anchor=(1.3, 0.90), title='County Type',
+        loc='upper right', bbox_to_anchor=(1.31, 0.90), title='County Type',
         fontsize=10, title_fontsize=10
     )
 
@@ -404,7 +404,7 @@ def plot_illinois_map():
     add_image(ax, IDPH_LOGO_PATH, (0.35, 0.07), 0.25)
 
     # Illinois outline inset
-    add_illinois_outline(ax, state_boundary, (0.63, 0.65), 0.057)
+    add_illinois_outline(ax, state_boundary, (0.65, 0.65), 0.057)
 
     # Total count text
     ax.text(
