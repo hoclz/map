@@ -14,7 +14,7 @@ st.markdown(
     <style>
         /* Target the main container using data-testid attribute */
         [data-testid="stAppViewContainer"] {
-            max-width: 900px;  /* Adjust this value to set your desired width */
+            max-width: 1000px;  /* Adjust this value to set your desired width */
             margin: 0 auto;
             padding: 1rem;
         }
