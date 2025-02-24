@@ -15,24 +15,31 @@ import streamlit as st
 # 1) PARAMETERS (Updated for Streamlit)
 # -------------------------------------------------------------------------
 def plot_illinois_map():
+    # Pull the selected values from Streamlit session state
     PARAM_YEAR = st.session_state.selected_year
     PARAM_RACE = st.session_state.selected_race
-    
+
+    # Paths and URLs
     CSV_PATH = "Asthma_regional_data.csv"
     COUNTY_TYPE_CSV = "county_type.csv"
     ILLINOIS_GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/illinois-counties.geojson"
     TOTAL_COUNT_CSV = "total_count_per_race_ethnicity.csv"
+
+    # If you're deploying to Streamlit Cloud, consider using a URL or a base64 image:
     IDPH_LOGO_PATH = "static/maps/IDPH_logo.png"
 
+    # Define color for each race group
     dynamic_line_color = {
-        "NHB": "#E41A1C", "NHW": "#377EB8",
-        "NHA": "#4DAF4A", "HISP": "#984EA3"
+        "NHB": "#E41A1C",
+        "NHW": "#377EB8",
+        "NHA": "#4DAF4A",
+        "HISP": "#984EA3"
     }
     LINE_COLOR = dynamic_line_color[PARAM_RACE.upper()]
 
-# -------------------------------------------------------------------------
-# 2) READ & PREPARE THE ASTHMA DATA
-# -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # 2) READ & PREPARE THE ASTHMA DATA
+    # -------------------------------------------------------------------------
     df = pd.read_csv(CSV_PATH)
     rename_map = {
         "Group": "Race",
@@ -60,10 +67,12 @@ def plot_illinois_map():
         st.error(f"No data found for Race={PARAM_RACE}, Year={PARAM_YEAR}")
         return
 
+    # Prepare table data
     table_data = [[PARAM_RACE.upper()]]
     for _, row in df_filtered.iterrows():
         table_data.append([f"{row['Region']}, {row['Rate']}"])
 
+    # Sort table rows in descending order by Rate
     parsed = []
     for row in table_data[1:]:
         region, val = row[0].split(",", 1)
@@ -71,6 +80,7 @@ def plot_illinois_map():
     parsed.sort(key=lambda x: x[1], reverse=True)
     table_data = [table_data[0]] + [[f"{r}, {v}"] for (r, v) in parsed]
 
+    # Read total counts for the selected year
     df_total_counts = pd.read_csv(TOTAL_COUNT_CSV).rename(columns=rename_map)
     total_row = df_total_counts[
         (df_total_counts["Race"].str.upper() == PARAM_RACE.upper()) &
@@ -78,9 +88,9 @@ def plot_illinois_map():
     ]
     TOTAL_COUNT = int(total_row[str(PARAM_YEAR)].iloc[0])
 
-# -------------------------------------------------------------------------
-# 3) BUILD THE CIRCLE VALUES
-# -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # 3) BUILD THE CIRCLE VALUES
+    # -------------------------------------------------------------------------
     valid_circle_races = ["NHB", "NHW", "NHA", "HISP"]
     df_circle = df_melted[
         (df_melted["Year"] == PARAM_YEAR) &
@@ -94,9 +104,9 @@ def plot_illinois_map():
 
     selected_year = PARAM_YEAR
 
-# -------------------------------------------------------------------------
-# 4) READ & PREPARE GEOGRAPHY
-# -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # 4) READ & PREPARE GEOGRAPHY
+    # -------------------------------------------------------------------------
     illinois = gpd.read_file(ILLINOIS_GEOJSON_URL).to_crs(epsg=26971)
     state_boundary = illinois.dissolve()
     df_county_type = pd.read_csv(COUNTY_TYPE_CSV)
@@ -104,26 +114,26 @@ def plot_illinois_map():
 
     regions = {
         "NORTH": ["Boone", "Carroll", "Dekalb", "Jo Daviess", "Lee", "Ogle",
-                 "Stephenson", "Whiteside", "Winnebago"],
+                  "Stephenson", "Whiteside", "Winnebago"],
         "NORTH-CENTRAL": ["Bureau", "Fulton", "Grundy", "Henderson", "Henry",
-                         "Kendall", "Knox", "Lasalle", "Livingston", "Marshall",
-                         "Mcdonough", "Mclean", "Mercer", "Peoria", "Putnam",
-                         "Rock Island", "Stark", "Tazewell", "Warren", "Woodford"],
+                          "Kendall", "Knox", "Lasalle", "Livingston", "Marshall",
+                          "Mcdonough", "Mclean", "Mercer", "Peoria", "Putnam",
+                          "Rock Island", "Stark", "Tazewell", "Warren", "Woodford"],
         "WEST-CENTRAL": ["Adams", "Brown", "Calhoun", "Cass", "Christian",
-                        "Greene", "Hancock", "Jersey", "Logan", "Macoupin",
-                        "Mason", "Menard", "Montgomery", "Morgan", "Pike",
-                        "Sangamon", "Schuyler", "Scott"],
+                         "Greene", "Hancock", "Jersey", "Logan", "Macoupin",
+                         "Mason", "Menard", "Montgomery", "Morgan", "Pike",
+                         "Sangamon", "Schuyler", "Scott"],
         "METRO EAST": ["Bond", "Clinton", "Madison", "Monroe", "Randolph",
-                      "St. Clair", "Washington"],
+                       "St. Clair", "Washington"],
         "SOUTHERN": ["Alexander", "Edwards", "Franklin", "Gallatin", "Hamilton",
                      "Hardin", "Jackson", "Jefferson", "Johnson", "Marion",
                      "Massac", "Perry", "Pope", "Pulaski", "Saline", "Union",
                      "Wabash", "Wayne", "White", "Williamson"],
         "EAST-CENTRAL": ["Champaign", "Clark", "Clay", "Coles", "Crawford",
-                        "Cumberland", "Dewitt", "Douglas", "Edgar", "Effingham",
-                        "Fayette", "Ford", "Iroquois", "Jasper", "Lawrence",
-                        "Macon", "Moultrie", "Piatt", "Richland", "Shelby",
-                        "Vermilion"],
+                         "Cumberland", "Dewitt", "Douglas", "Edgar", "Effingham",
+                         "Fayette", "Ford", "Iroquois", "Jasper", "Lawrence",
+                         "Macon", "Moultrie", "Piatt", "Richland", "Shelby",
+                         "Vermilion"],
         "SOUTH SUBURBAN": ["Kankakee", "Will"],
         "WEST SUBURBAN": ["Dupage", "Kane"],
         "NORTH SUBURBAN": ["Lake", "Mchenry"],
@@ -143,6 +153,7 @@ def plot_illinois_map():
         "COOK": (255/255, 255/255, 255/255)
     }
 
+    # Assign each county to a region
     illinois["Region"] = "Other"
     for region_name, county_list in regions.items():
         illinois.loc[illinois["name"].isin(county_list), "Region"] = region_name
@@ -161,16 +172,16 @@ def plot_illinois_map():
         "COOK": (1050000, 4600000, 10)
     }
 
+    # Updated sources text (removed #NAME?)
     sources_text = f"""Sources
 + Population: Census Data, {PARAM_YEAR}
 + Asthma Count: Hospital Discharge Data, {PARAM_YEAR}
-#NAME?
 + Region: https://graphics.chicagotribune.com/
   illinois-tier-mitigations/map-blurb.html"""
 
-# -------------------------------------------------------------------------
-# 5) HELPER FUNCTIONS
-# -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # 5) HELPER FUNCTIONS
+    # -------------------------------------------------------------------------
     def add_image(ax, image_path, position, zoom):
         img = plt.imread(image_path)
         imagebox = OffsetImage(img, zoom=zoom)
@@ -178,6 +189,7 @@ def plot_illinois_map():
         ax.add_artist(ab)
 
     def add_illinois_outline(ax, boundary_gdf, position, zoom):
+        # We'll add an inset axis to show the Illinois boundary highlight
         inset_ax = fig.add_axes([position[0], position[1], zoom, zoom])
         boundary_gdf.boundary.plot(ax=inset_ax, linewidth=2, edgecolor=LINE_COLOR)
         inset_ax.axis('off')
@@ -197,6 +209,7 @@ def plot_illinois_map():
         ax.plot([cord_x, contact_x], [cord_y, contact_y], color=LINE_COLOR, linewidth=1)
 
     def draw_complete_diagram(ax, position):
+        # Diagram for statewide rates by race
         diagram_ax = fig.add_axes(position)
         diagram_ax.axis("off")
         edge_length_factor = 0.8
@@ -217,30 +230,71 @@ def plot_illinois_map():
         apex_x, apex_y = 0, y_offset
         vertical_x, vertical_y = apex_x, apex_y - vertical_line_length
 
+        # Draw funnel-like shape
         diagram_ax.plot([x_left, apex_x], [y_left, apex_y], color=LINE_COLOR, linewidth=2)
         diagram_ax.plot([apex_x, x_right], [apex_y, y_right], color=LINE_COLOR, linewidth=2)
         diagram_ax.plot([vertical_x, vertical_x], [apex_y, vertical_y], color=LINE_COLOR, linewidth=2)
 
+        # Add the small "fan" lines at the bottom
         for i in range(fan_count):
             angle_offset = -fan_angle / 2 + i * (fan_angle / (fan_count - 1))
             x_fan = vertical_x + 0.3 * np.sin(np.radians(angle_offset))
             y_fan = vertical_y - 0.3 * np.cos(np.radians(angle_offset))
             diagram_ax.plot([vertical_x, x_fan], [vertical_y, y_fan], color=LINE_COLOR, linewidth=1)
 
+        # Extract circle values
         val_nhb = circle_dict["NHB"]
         val_nhw = circle_dict["NHW"]
         val_nha = circle_dict["NHA"]
         val_hisp = circle_dict["HISP"]
 
-        draw_circle_with_cord(diagram_ax, (x_left+apex_x)/2, (y_left+apex_y)/2-0.3, circle_radius, val_nhb,
-                             (x_left+apex_x)/2, (y_left+apex_y+0.03)/2, "NHB", PARAM_RACE=="NHB")
-        draw_circle_with_cord(diagram_ax, (x_left+apex_x*2)/3, (y_left+apex_y*2)/3-0.4, circle_radius, val_nhw,
-                             (x_left+apex_x*2)/3, (y_left+apex_y*2)/3, "NHW", PARAM_RACE=="NHW")
-        draw_circle_with_cord(diagram_ax, (x_right+apex_x)/2, (y_right+apex_y)/2-0.3, circle_radius, val_nha,
-                             (x_right+apex_x)/2, (y_right+apex_y)/2, "NHA", PARAM_RACE=="NHA")
-        draw_circle_with_cord(diagram_ax, (x_right+apex_x*2)/3, (y_right+apex_y*2)/3-0.4, circle_radius, val_hisp,
-                             (x_right+apex_x*2)/3, (y_right+apex_y*2)/3, "HISP", PARAM_RACE=="HISP")
+        # Place circles and labels
+        draw_circle_with_cord(
+            diagram_ax,
+            (x_left+apex_x)/2,
+            (y_left+apex_y)/2 - 0.3,
+            circle_radius,
+            val_nhb,
+            (x_left+apex_x)/2,
+            (y_left+apex_y+0.03)/2,
+            "NHB",
+            PARAM_RACE=="NHB"
+        )
+        draw_circle_with_cord(
+            diagram_ax,
+            (x_left+apex_x*2)/3,
+            (y_left+apex_y*2)/3 - 0.4,
+            circle_radius,
+            val_nhw,
+            (x_left+apex_x*2)/3,
+            (y_left+apex_y*2)/3,
+            "NHW",
+            PARAM_RACE=="NHW"
+        )
+        draw_circle_with_cord(
+            diagram_ax,
+            (x_right+apex_x)/2,
+            (y_right+apex_y)/2 - 0.3,
+            circle_radius,
+            val_nha,
+            (x_right+apex_x)/2,
+            (y_right+apex_y)/2,
+            "NHA",
+            PARAM_RACE=="NHA"
+        )
+        draw_circle_with_cord(
+            diagram_ax,
+            (x_right+apex_x*2)/3,
+            (y_right+apex_y*2)/3 - 0.4,
+            circle_radius,
+            val_hisp,
+            (x_right+apex_x*2)/3,
+            (y_right+apex_y*2)/3,
+            "HISP",
+            PARAM_RACE=="HISP"
+        )
 
+        # Legend text
         legend_items = {
             "NHA": "Non-Hispanic Asian",
             "NHB": "Non-Hispanic Black",
@@ -249,31 +303,40 @@ def plot_illinois_map():
         }
         y_legend_start = vertical_y + 0.6
         line_spacing = 0.3
-        
+
         for i, (rc, desc) in enumerate(legend_items.items()):
             txt_line = f"{rc} = {desc}"
-            diagram_ax.text(apex_x + 1, y_legend_start - i*line_spacing, txt_line,
-                           fontsize=9, ha="center", fontweight="bold" if rc==PARAM_RACE else "normal")
+            diagram_ax.text(
+                apex_x + 1,
+                y_legend_start - i*line_spacing,
+                txt_line,
+                fontsize=9,
+                ha="center",
+                fontweight="bold" if rc == PARAM_RACE else "normal"
+            )
 
+        # Diagram bounds
         diagram_ax.set_xlim(-length*scale_factor, length*scale_factor)
         diagram_ax.set_ylim(-length*scale_factor, (y_offset+length)*scale_factor)
         diagram_ax.set_aspect('equal')
 
+        # Title for funnel diagram
         title_text = f"Statewide Asthma Age-Adjusted Rate Per 100,000\nby Race/Ethnicity ({selected_year})"
         title = diagram_ax.set_title(title_text, fontsize=9, y=1.05)
         if PARAM_RACE in title.get_text():
             title.set_bbox(dict(facecolor="yellow", alpha=0.8, edgecolor="none"))
 
-# -------------------------------------------------------------------------
-# 6) PLOT ILLINOIS MAP
-# -------------------------------------------------------------------------
-    fig, ax = plt.subplots(figsize=(14, 8))
+    # -------------------------------------------------------------------------
+    # 6) PLOT ILLINOIS MAP
+    # -------------------------------------------------------------------------
+    # CHANGED: Increased figsize to make the map more visible
+    fig, ax = plt.subplots(figsize=(16, 10))
 
     # Map halo
     halo = unary_union(illinois.geometry).buffer(5000)
     gpd.GeoSeries([halo]).plot(ax=ax, color=LINE_COLOR, edgecolor='none')
 
-    # Main map
+    # Main map fill
     illinois.plot(ax=ax, color=illinois["color"], edgecolor='darkgray')
     illinois.boundary.plot(ax=ax, edgecolor='gray', linewidth=1)
 
@@ -287,13 +350,16 @@ def plot_illinois_map():
         elif row["Urban_Rural"] == "Rural":
             ax.scatter(cx, cy - marker_offset, color='magenta', s=40, marker='*')
 
-    # Region labels
+    # Region labels (numbers in each region)
     for region_name, (x, y, label) in region_labels.items():
-        ax.text(x, y, str(label), fontsize=12, ha='center', va='center',
-               color='white', fontweight='bold',
-               path_effects=[withStroke(linewidth=3, foreground="black")])
+        ax.text(
+            x, y, str(label),
+            fontsize=12, ha='center', va='center',
+            color='white', fontweight='bold',
+            path_effects=[withStroke(linewidth=3, foreground="black")]
+        )
 
-    # Legends
+    # Region legend
     region_legend = ax.legend(
         handles=[Patch(facecolor=c, edgecolor='black', label=l) for l, c in region_colors.items()],
         loc='upper left', bbox_to_anchor=(0.75, 0.90), title='Regions',
@@ -301,43 +367,53 @@ def plot_illinois_map():
     )
     ax.add_artist(region_legend)
 
+    # County Type legend
     county_legend = ax.legend(
         handles=[
             Line2D([0], [0], marker='o', color='w', label='Urban',
-                  markerfacecolor='teal', markersize=8),
+                   markerfacecolor='teal', markersize=8),
             Line2D([0], [0], marker='*', color='w', label='Rural',
-                  markerfacecolor='magenta', markersize=12)
+                   markerfacecolor='magenta', markersize=12)
         ],
         loc='upper right', bbox_to_anchor=(0.75, 0.90), title='County Type',
         fontsize=10, title_fontsize=10
     )
 
-    # Data table
+    # Data table (side box)
     table_ax = fig.add_axes([0.28, 0.38, 0.12, 0.4])
     table_ax.axis("off")
     tab = Table(table_ax, bbox=[0, 0, 1, 1])
-    for i, row in enumerate(table_data):
-        cell = tab.add_cell(i, 0, width=2.5, height=0.8, text=row[0],
-                          loc='center', facecolor='white', edgecolor='black')
+    for i, row_data in enumerate(table_data):
+        cell = tab.add_cell(
+            i, 0, width=2.5, height=0.8,
+            text=row_data[0],
+            loc='center', facecolor='white', edgecolor='black'
+        )
         cell.set_text_props(fontweight='bold' if i == 0 else 'normal')
 
     # Sources text
     text_ax = fig.add_axes([0.277, 0.125, 0.22, 0.2])
     text_ax.axis("off")
-    text_ax.text(0, 1, sources_text, transform=text_ax.transAxes,
-                fontsize=9, va="top", ha="left", linespacing=1.5)
+    text_ax.text(
+        0, 1, sources_text,
+        transform=text_ax.transAxes,
+        fontsize=9, va="top", ha="left", linespacing=1.5
+    )
 
-    # IDPH logo
+    # IDPH logo (local path)
     add_image(ax, IDPH_LOGO_PATH, (0.35, 0.07), 0.25)
 
-    # Illinois outline
+    # Small inset outline of Illinois
     add_illinois_outline(ax, state_boundary, (0.63, 0.65), 0.057)
 
-    # Total count
-    ax.text(0.70, 0.74, f"T={TOTAL_COUNT}", transform=ax.transAxes,
-           fontsize=9, color='black', ha='left', va='center')
+    # Total count text
+    ax.text(
+        0.70, 0.74, f"T={TOTAL_COUNT}",
+        transform=ax.transAxes,
+        fontsize=9, color='black', ha='left', va='center'
+    )
 
-    # Funnel diagram
+    # Funnel diagram (statewide rates)
     draw_complete_diagram(ax, [0.64, 0.03, 0.15, 0.5])
 
     # Main title
@@ -347,13 +423,16 @@ def plot_illinois_map():
         "NHA": "Non-Hispanic Asian",
         "HISP": "Hispanic"
     }
-    title_text = (f"Regional Asthma Age-Adjusted Rates Per 100,000 HOSPITALIZATION Discharges\n"
-                 f"for {race_descriptions[PARAM_RACE]} ({PARAM_RACE}) Population, {PARAM_YEAR}")
+    title_text = (
+        f"Regional Asthma Age-Adjusted Rates Per 100,000 HOSPITALIZATION Discharges\n"
+        f"for {race_descriptions[PARAM_RACE]} ({PARAM_RACE}) Population, {PARAM_YEAR}"
+    )
     ax.set_title(title_text, fontsize=12, y=1.05)
     ax.set_axis_off()
 
-# -------------------------------------------------------------------------
-# 7) RENDER IN STREAMLIT
-# -------------------------------------------------------------------------
-    st.pyplot(fig)
-    plt.close()
+    # -------------------------------------------------------------------------
+    # 7) RENDER IN STREAMLIT
+    # -------------------------------------------------------------------------
+    # CHANGED: Use container width + close the figure
+    st.pyplot(fig, use_container_width=True)
+    plt.close(fig)
