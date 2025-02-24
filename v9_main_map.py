@@ -401,14 +401,14 @@ def plot_illinois_map():
     )
 
     # IDPH logo
-    add_image(ax, IDPH_LOGO_PATH, (0.26, 0.07), 0.25)
+    add_image(ax, IDPH_LOGO_PATH, (0.24, 0.07), 0.25)
 
     # Illinois outline inset
     add_illinois_outline(ax, state_boundary, (0.65, 0.65), 0.057)
 
     # Total count text
     ax.text(
-        1.3, 0.74, f"T={TOTAL_COUNT}",
+        0.90, 0.74, f"T={TOTAL_COUNT}",
         transform=ax.transAxes,
         fontsize=9, color='black', ha='left', va='center'
     )
