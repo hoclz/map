@@ -408,7 +408,7 @@ def plot_illinois_map():
 
     # Total count text
     ax.text(
-        0.90, 0.74, f"T={TOTAL_COUNT}",
+        1.10, 0.74, f"T={TOTAL_COUNT}",
         transform=ax.transAxes,
         fontsize=9, color='black', ha='left', va='center'
     )
