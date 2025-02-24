@@ -1,39 +1,45 @@
 import os
 import subprocess
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 
 app = Flask(__name__)
 
-# Define folder for generated maps
-OUTPUT_FOLDER = "static/maps"
-if not os.path.exists(OUTPUT_FOLDER):
-    os.makedirs(OUTPUT_FOLDER)
+# Define the folder for generated maps
+OUTPUT_FOLDER = os.path.join(os.getcwd(), "static/maps")
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# Path to your full-featured map script
-MAP_GENERATION_SCRIPT = r"F:\j45\userform for numerator\dashboard\v9_main_map.py"
+# Correct path to the main map script
+MAP_GENERATION_SCRIPT = os.path.join(os.getcwd(), "v9_main_map.py")
 
 @app.route('/update_map', methods=['GET'])
 def update_map():
     """Generate and return the updated map based on user selection."""
     year = request.args.get('year', "2023")
-    race = request.args.get('race', "NHA")
+    race = request.args.get('race', "NHA").upper()  # Ensure uppercase for dataset consistency
 
-    # Define the expected map file path
-    map_path = f"{OUTPUT_FOLDER}/{race}_{year}.png"
+    # Define expected map file path
+    map_path = os.path.join(OUTPUT_FOLDER, f"{race}_{year}.png")
 
-    # Delete old map to force regeneration
+    # Remove old map if it exists to force regeneration
     if os.path.exists(map_path):
         os.remove(map_path)
 
-    # Run the full-featured script with selected parameters
+    # Run the main map script
     try:
-        subprocess.run(["python", MAP_GENERATION_SCRIPT, str(year), race], check=True)
+        result = subprocess.run(
+            ["python", MAP_GENERATION_SCRIPT, str(year), race],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        print("Map Generation Output:", result.stdout)
+        print("Map Generation Errors:", result.stderr)
     except subprocess.CalledProcessError as e:
-        return f"Error generating map: {str(e)}", 500
+        return jsonify({"error": "Map generation failed", "details": str(e)}), 500
 
     # Ensure the new map is created
     if not os.path.exists(map_path):
-        return f"Error: Map '{map_path}' not found.", 404
+        return jsonify({"error": f"Map '{map_path}' not found."}), 404
 
     return send_file(map_path, mimetype='image/png')
 
