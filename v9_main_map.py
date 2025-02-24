@@ -370,6 +370,15 @@ def draw_complete_diagram(fig, ax, position, circle_dict):
 # Set up the figure and axis
 fig, ax = plt.subplots(figsize=(14, 8))
 
+# Ensure the static folder exists
+if not os.path.exists(STATIC_MAP_FOLDER):
+    os.makedirs(STATIC_MAP_FOLDER)
+
+# Ensure total count exists before displaying it
+if "TOTAL_COUNT" not in globals():
+    st.warning("⚠️ Total count is missing. Check your dataset.")
+    TOTAL_COUNT = "N/A"  # Default to "N/A" if not available
+
 # IDPH LOGO (#6) - Adjusted for Streamlit Deployment
 LOGO_PATH = "static/maps/IDPH_logo.png"
 if os.path.exists(LOGO_PATH):
@@ -395,7 +404,10 @@ ax.text(
 )
 
 # COMPLETE DIAGRAM (#11)
-draw_complete_diagram(fig, ax, [0.64, 0.03, 0.15, 0.5], circle_dict)
+if circle_dict:
+    draw_complete_diagram(fig, ax, [0.64, 0.03, 0.15, 0.5], circle_dict)
+else:
+    st.warning("⚠️ Circle values are missing. Diagram may not display correctly.")
 
 # FINAL TITLE (#2) using Dynamic Formatting
 race_descriptions = {
@@ -430,13 +442,16 @@ if not os.path.exists(OUTPUT_FOLDER):
 # Define file path for saved figure
 map_filename = f"{OUTPUT_FOLDER}/{PARAM_RACE}_{PARAM_YEAR}.png"
 
-# Save the figure
-plt.savefig(map_filename, dpi=100, bbox_inches='tight')
-plt.close()  # Close figure to free memory
+# Ensure the map is generated before displaying
+map_filename = plot_illinois_map(fig_width=14, fig_height=8)
 
 # Display the saved image in Streamlit
-st.subheader(f"Generated Map for {race_descriptions.get(PARAM_RACE.upper(), PARAM_RACE)} ({PARAM_YEAR})")
-st.image(map_filename, caption=f"Asthma Rates for {PARAM_RACE.upper()}, {PARAM_YEAR}", use_column_width=True)
+if map_filename and os.path.exists(map_filename):
+    st.subheader(f"Generated Map for {race_descriptions.get(PARAM_RACE.upper(), PARAM_RACE)} ({PARAM_YEAR})")
+    st.image(map_filename, caption=f"Asthma Rates for {PARAM_RACE.upper()}, {PARAM_YEAR}", use_column_width=True)
+else:
+    st.warning("⚠️ Map could not be generated. Check dataset and parameters.")
+
 
 # -------------------------------------------------------------------------
 # 7) RUN THE PLOT (Optimized for Streamlit Deployment)
