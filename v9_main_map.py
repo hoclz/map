@@ -30,7 +30,7 @@ def plot_illinois_map():
 
     # Define color for each race group
     dynamic_line_color = {
-        "NHB": "#E41A1C",
+        "NHB": "#FF8C00",
         "NHW": "#377EB8",
         "NHA": "#4DAF4A",
         "HISP": "#984EA3"
