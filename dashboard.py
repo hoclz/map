@@ -5,7 +5,11 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 from shapely.ops import unary_union
 
-# Ensure the correct working directory
+# -------------------------------------------------------------------------
+# 1) INITIAL SETUP & PARAMETERS
+# -------------------------------------------------------------------------
+
+# Ensure the correct working directory for static maps
 STATIC_MAP_FOLDER = "static/maps"
 os.makedirs(STATIC_MAP_FOLDER, exist_ok=True)
 
@@ -25,7 +29,10 @@ st.set_page_config(
     page_icon="📊"
 )
 
-# Custom CSS for better UI
+# -------------------------------------------------------------------------
+# 2) CUSTOM CSS FOR STYLING
+# -------------------------------------------------------------------------
+
 st.markdown(
     """
     <style>
@@ -64,6 +71,10 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# -------------------------------------------------------------------------
+# 3) UI COMPONENTS (YEAR & RACE SELECTION)
+# -------------------------------------------------------------------------
+
 # Title and subtitle
 st.markdown('<p class="title">📊 Illinois Asthma Hospitalization Rates</p>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Select Year & Race to View the Updated Map</p>', unsafe_allow_html=True)
@@ -72,19 +83,31 @@ st.markdown('<p class="subtitle">Select Year & Race to View the Updated Map</p>'
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    PARAM_YEAR = st.selectbox("📅 Select Year", YEARS, index=len(YEARS) - 1)
-    
+    PARAM_YEAR = st.selectbox("📅 Select Year", YEARS, index=len(YEARS) - 1)  # Default to latest year
+
 with col2:
     PARAM_RACE = st.selectbox("🎨 Select Race", list(RACES.keys()), format_func=lambda x: RACES[x])
 
-# Define paths
-map_filename = os.path.join(STATIC_MAP_FOLDER, f"{PARAM_RACE}_{PARAM_YEAR}.png")
+# -------------------------------------------------------------------------
+# 4) CHECK IF MAP EXISTS & DISPLAY IT
+# -------------------------------------------------------------------------
 
-# Check if map exists, otherwise warn user
-if os.path.exists(map_filename):
-    st.image(map_filename, caption=f"📌 Asthma Hospitalization for {RACES[PARAM_RACE]} in {PARAM_YEAR}", use_column_width=True)
-else:
-    st.warning(f"⚠️ No map found for {RACES[PARAM_RACE]} in {PARAM_YEAR}. Please generate the map first.")
+# Function to check if the map file exists
+def check_and_display_map(year, race):
+    map_filename = os.path.join(STATIC_MAP_FOLDER, f"{race}_{year}.png")
 
-# Footer
+    if os.path.exists(map_filename):
+        st.image(map_filename, caption=f"📌 Asthma Hospitalization for {RACES[race]} in {year}", use_column_width=True)
+    else:
+        st.warning(
+            f"⚠️ No map found for {RACES[race]} in {year}. Please ensure the map has been generated first."
+        )
+
+# Call function to display map
+check_and_display_map(PARAM_YEAR, PARAM_RACE)
+
+# -------------------------------------------------------------------------
+# 5) FOOTER
+# -------------------------------------------------------------------------
+
 st.markdown('<div class="footer">Developed by hoclz | Powered by Streamlit 🚀</div>', unsafe_allow_html=True)
