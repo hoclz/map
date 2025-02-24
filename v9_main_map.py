@@ -381,7 +381,7 @@ def plot_illinois_map():
 
     # Data table
     table_ax = fig.add_axes([0.30, 0.38, 0.12, 0.4])
-    table_ax.Axis ("off")
+    table_ax.axis("off")
     
     # 1) Create the Table object
     tab = Table(table_ax, bbox=[0, 0, 1, 1])
