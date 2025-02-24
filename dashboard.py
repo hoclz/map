@@ -14,7 +14,7 @@ st.markdown(
     <style>
         /* Restrict the main content container to a max-width */
         .reportview-container .main .block-container {
-            max-width: 800px;
+            max-width: 200px;
             margin: 0 auto;
             padding-left: 1rem;
             padding-right: 1rem;
