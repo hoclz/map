@@ -380,23 +380,24 @@ def plot_illinois_map():
     )
 
     # Data table
-     table_ax = fig.add_axes([0.30, 0.38, 0.12, 0.4])
-    table_ax.axis("off")
-
+        table_ax = fig.add_axes([0.30, 0.38, 0.12, 0.4])
+    table_ax.Axis ("off")
+    
     # 1) Create the Table object
     tab = Table(table_ax, bbox=[0, 0, 1, 1])
-
+    
     # 2) Add cells to the Table
     for i, row_data in enumerate(table_data):
-    cell = tab.add_cell(
-        i, 0, width=2.5, height=0.8,
-        text=row_data[0],
-        loc='center', facecolor='white', edgecolor='black'
-    )
-    cell.set_text_props(fontweight='bold' if i == 0 else 'normal')
+        cell = tab.add_cell(
+            i, 0, width=2.5, height=0.8,
+            text=row_data[0],
+            loc='center', facecolor='white', edgecolor='black'
+        )
+        cell.set_text_props(fontweight='bold' if i == 0 else 'normal')
+    
+    # 3) **Add the Table object to the axes** so it appears
+    table_ax.add_table(tab)
 
-# 3) **Add the Table object to the axes** so it appears
-table_ax.add_table(tab)
 
     # Sources text
     text_ax = fig.add_axes([0.237, 0.125, 0.22, 0.2])
