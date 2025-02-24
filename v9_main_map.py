@@ -237,21 +237,34 @@ sources_text = f"""**Sources**
 - Region: [Chicago Tribune - Illinois Tier Mitigations](https://graphics.chicagotribune.com/illinois-tier-mitigations/map-blurb.html)
 """
 
+# ------------------------------------------------------------------------- 
+# 5) HELPER FUNCTIONS (Optimized for Streamlit)
 # -------------------------------------------------------------------------
-# 5) HELPER FUNCTIONS
-# -------------------------------------------------------------------------
-def add_image(ax, image_path, position, zoom):
-    img = plt.imread(image_path)
-    imagebox = OffsetImage(img, zoom=zoom)
-    ab = AnnotationBbox(imagebox, position, frameon=False, xycoords='axes fraction')
-    ax.add_artist(ab)
 
-def add_illinois_outline(ax, boundary_gdf, position, zoom):
+def add_image(ax, image_path, position, zoom):
+    """
+    Adds an image to the plot at the specified position.
+    """
+    try:
+        img = plt.imread(image_path)
+        imagebox = OffsetImage(img, zoom=zoom)
+        ab = AnnotationBbox(imagebox, position, frameon=False, xycoords='axes fraction')
+        ax.add_artist(ab)
+    except FileNotFoundError:
+        st.warning(f"⚠️ Image file not found: {image_path}")
+
+def add_illinois_outline(fig, ax, boundary_gdf, position, zoom):
+    """
+    Adds an Illinois state outline inset map.
+    """
     inset_ax = fig.add_axes([position[0], position[1], zoom, zoom])
     boundary_gdf.boundary.plot(ax=inset_ax, linewidth=2, edgecolor=LINE_COLOR)
     inset_ax.axis('off')
 
 def draw_circle_with_cord(ax, center_x, center_y, radius, value, cord_x, cord_y, label="", highlight=False):
+    """
+    Draws a labeled circle with a connecting cord.
+    """
     angle = np.arctan2(cord_y - center_y, cord_x - center_x)
     contact_x = center_x + radius * np.cos(angle)
     contact_y = center_y + radius * np.sin(angle)
@@ -260,17 +273,17 @@ def draw_circle_with_cord(ax, center_x, center_y, radius, value, cord_x, cord_y,
     ax.add_patch(circle)
 
     ax.text(center_x, center_y, value, ha="center", va="center", fontsize=9)
-    if highlight:
-        ax.text(
-            cord_x, cord_y + 0.15, label.upper(),
-            ha="center", va="center", fontsize=9,
-            fontweight="bold"
-        )
-    else:
-        ax.text(cord_x, cord_y + 0.1, label.upper(), ha="center", va="center", fontsize=9)
+    
+    label_fontweight = "bold" if highlight else "normal"
+    ax.text(cord_x, cord_y + 0.15 if highlight else cord_y + 0.1, label.upper(),
+            ha="center", va="center", fontsize=9, fontweight=label_fontweight)
+    
     ax.plot([cord_x, contact_x], [cord_y, contact_y], color=LINE_COLOR, linewidth=1)
 
-def draw_complete_diagram(ax, position):
+def draw_complete_diagram(fig, ax, position, circle_dict):
+    """
+    Draws a complete asthma rate diagram based on the `circle_dict` values.
+    """
     diagram_ax = fig.add_axes(position)
     diagram_ax.axis("off")
 
@@ -304,199 +317,51 @@ def draw_complete_diagram(ax, position):
         y_fan = vertical_y - 0.3 * np.cos(np.radians(angle_offset))
         diagram_ax.plot([vertical_x, x_fan], [vertical_y, y_fan], color=LINE_COLOR, linewidth=1)
 
-    val_nhb = circle_dict["NHB"]
-    val_nhw = circle_dict["NHW"]
-    val_nha = circle_dict["NHA"]
-    val_hisp = circle_dict["HISP"]
+    # Extract statewide values
+    val_nhb = circle_dict.get("NHB", "N/A")
+    val_nhw = circle_dict.get("NHW", "N/A")
+    val_nha = circle_dict.get("NHA", "N/A")
+    val_hisp = circle_dict.get("HISP", "N/A")
 
-    # NHB
-    draw_circle_with_cord(
-        diagram_ax,
-        (x_left + apex_x) / 2,
-        (y_left + apex_y) / 2 - 0.3,
-        circle_radius,
-        val_nhb,
-        (x_left + apex_x) / 2,
-        (y_left + apex_y + 0.03) / 2,
-        label="NHB",
-        highlight=(PARAM_RACE.upper() == "NHB")
-    )
-    # NHW
-    draw_circle_with_cord(
-        diagram_ax,
-        (x_left + apex_x * 2) / 3,
-        (y_left + apex_y * 2) / 3 - 0.4,
-        circle_radius,
-        val_nhw,
-        (x_left + apex_x * 2) / 3,
-        (y_left + apex_y * 2) / 3,
-        label="NHW",
-        highlight=(PARAM_RACE.upper() == "NHW")
-    )
-    # NHA
-    draw_circle_with_cord(
-        diagram_ax,
-        (x_right + apex_x) / 2,
-        (y_right + apex_y) / 2 - 0.3,
-        circle_radius,
-        val_nha,
-        (x_right + apex_x) / 2,
-        (y_right + apex_y) / 2,
-        label="NHA",
-        highlight=(PARAM_RACE.upper() == "NHA")
-    )
-    # HISP
-    draw_circle_with_cord(
-        diagram_ax,
-        (x_right + apex_x * 2) / 3,
-        (y_right + apex_y * 2) / 3 - 0.4,
-        circle_radius,
-        val_hisp,
-        (x_right + apex_x * 2) / 3,
-        (y_right + apex_y * 2) / 3,
-        label="HISP",
-        highlight=(PARAM_RACE.upper() == "HISP")
-    )
+    # Draw labeled circles
+    draw_circle_with_cord(diagram_ax, (x_left + apex_x) / 2, (y_left + apex_y) / 2 - 0.3,
+                          circle_radius, val_nhb, (x_left + apex_x) / 2, (y_left + apex_y + 0.03) / 2,
+                          label="NHB", highlight=(PARAM_RACE.upper() == "NHB"))
+    
+    draw_circle_with_cord(diagram_ax, (x_left + apex_x * 2) / 3, (y_left + apex_y * 2) / 3 - 0.4,
+                          circle_radius, val_nhw, (x_left + apex_x * 2) / 3, (y_left + apex_y * 2) / 3,
+                          label="NHW", highlight=(PARAM_RACE.upper() == "NHW"))
+    
+    draw_circle_with_cord(diagram_ax, (x_right + apex_x) / 2, (y_right + apex_y) / 2 - 0.3,
+                          circle_radius, val_nha, (x_right + apex_x) / 2, (y_right + apex_y) / 2,
+                          label="NHA", highlight=(PARAM_RACE.upper() == "NHA"))
+    
+    draw_circle_with_cord(diagram_ax, (x_right + apex_x * 2) / 3, (y_right + apex_y * 2) / 3 - 0.4,
+                          circle_radius, val_hisp, (x_right + apex_x * 2) / 3, (y_right + apex_y * 2) / 3,
+                          label="HISP", highlight=(PARAM_RACE.upper() == "HISP"))
 
-    # Instead of a single text block, do multiple lines.
+    # Legend items
     legend_items = {
         "NHA": "Non-Hispanic Asian",
         "NHB": "Non-Hispanic Black",
         "NHW": "Non-Hispanic White",
         "HISP": "Hispanic"
     }
+    
     y_legend_start = vertical_y + 0.6
     line_spacing = 0.3
-    i = 0
-    for rc, desc in legend_items.items():
+    for i, (rc, desc) in enumerate(legend_items.items()):
         txt_line = f"{rc} = {desc}"
-        if rc == PARAM_RACE.upper():
-            diagram_ax.text(
-                apex_x + 1, 
-                y_legend_start - i*line_spacing,
-                txt_line,
-                fontsize=9,
-                ha="center",
-                fontweight="bold",
-                color="black"  # Bold red for the selected race
-            )
-        else:
-            diagram_ax.text(
-                apex_x + 1, 
-                y_legend_start - i*line_spacing,
-                txt_line,
-                fontsize=9,
-                ha="center",
-                fontweight="normal"
-            )
-        i += 1
+        fontweight = "bold" if rc == PARAM_RACE.upper() else "normal"
+        diagram_ax.text(apex_x + 1, y_legend_start - i * line_spacing, txt_line,
+                        fontsize=9, ha="center", fontweight=fontweight, color="black")
 
     diagram_ax.set_xlim(-length * scale_factor, length * scale_factor)
     diagram_ax.set_ylim(-length * scale_factor, (y_offset + length) * scale_factor)
     diagram_ax.set_aspect('equal', adjustable='box')
 
-    diagram_title_obj = plt.title(
-        f"Statewide Asthma Age-Adjusted Rate Per 100,000  \nby Race/Ethnicity ({selected_year}) ",
-        fontsize=9, y=1.05
-    )
-    if PARAM_RACE.upper() in diagram_title_obj.get_text().upper():
-        diagram_title_obj.set_bbox(dict(facecolor="yellow", alpha=0.8, edgecolor="none"))
-def plot_illinois_map(fig_width, fig_height):
-    global fig
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-
-    # Apply dynamic line color to the map halo
-    halo = unary_union(illinois.geometry).buffer(5000)
-    halo_gs = gpd.GeoSeries([halo])
-    halo_gs.plot(ax=ax, color=LINE_COLOR, edgecolor='none')
-
-    illinois.plot(ax=ax, color=illinois["color"], edgecolor='darkgray')
-    illinois.boundary.plot(ax=ax, edgecolor='gray', linewidth=1)
-
-    # Label counties and place marker for Urban vs Rural
-    for idx, row in illinois.iterrows():
-        cx, cy = row.geometry.centroid.x, row.geometry.centroid.y
-        ax.text(cx, cy, row["name"], fontsize=6, ha='center', color='black')
-        marker_offset = 5000
-        if row["Urban_Rural"] == "Urban":
-            ax.scatter(cx, cy - marker_offset, color='teal', s=20, marker='o')
-        elif row["Urban_Rural"] == "Rural":
-            ax.scatter(cx, cy - marker_offset, color='magenta', s=40, marker='*')
-
-    for region_name, (x, y, label) in region_labels.items():
-        ax.text(
-            x, y, str(label),
-            fontsize=12, ha='center', va='center',
-            color='white', fontweight='bold',
-            path_effects=[withStroke(linewidth=3, foreground="black")]
-        )
-
-    region_legend_elements = [
-        Patch(facecolor=color, edgecolor='black', label=rgn)
-        for rgn, color in region_colors.items()
-    ]
-    region_legend = ax.legend(
-        handles=region_legend_elements,
-        loc='upper left',
-        bbox_to_anchor=(0.75, 0.90),
-        title='Regions',
-        fontsize=8,
-        title_fontsize=10,
-        frameon=True
-    )
-    ax.add_artist(region_legend)
-
-    county_type_legend_elements = [
-        Line2D([0], [0], marker='o', color='w', label='Urban', markerfacecolor='teal', markersize=8),
-        Line2D([0], [0], marker='*', color='w', label='Rural', markerfacecolor='magenta', markersize=12)
-    ]
-    ax.legend(
-        handles=county_type_legend_elements,
-        loc='upper right',
-        bbox_to_anchor=(0.75, 0.90),
-        title='County Type',
-        fontsize=10,
-        title_fontsize=10,
-        frameon=True
-    )
-
-    # TABLE (#4) from table_data (already sorted)
-    table_ax = fig.add_axes([0.28, 0.38, 0.12, 0.4])  #  adjusting the width (3rd) value will increase the fontsize too
-    table_ax.axis("off")
-    tab = Table(table_ax, bbox=[0, 0, 1, 1])
-
-    cell_width = 2.5
-    cell_height = 0.8
-
-    for i, row_vals in enumerate(table_data):
-        for j, cell_val in enumerate(row_vals):
-            facecol = "white"
-            cell = tab.add_cell(
-                i, j,
-                width=cell_width,
-                height=cell_height,
-                text=cell_val,
-                loc='center',
-                facecolor=facecol,
-                edgecolor="black"
-            )
-            if i == 0 or PARAM_RACE.upper() in cell_val.upper():
-                cell.set_text_props(fontweight='bold')
-            else:
-                cell.set_text_props(fontweight='normal')
-
-    table_ax.add_table(tab)
-
-    # SOURCES TEXT (#5)
-    text_ax = fig.add_axes([0.277, 0.125, 0.22, 0.2])
-    text_ax.axis("off")
-    text_ax.text(
-        0, 1, sources_text,
-        transform=text_ax.transAxes,
-        fontsize=9, color="black",
-        va="top", ha="left",
-        linespacing=1.5
-    )
+    plt.title(f"Statewide Asthma Age-Adjusted Rate Per 100,000 by Race/Ethnicity ({selected_year})",
+              fontsize=9, y=1.05)
 
 # -------------------------------------------------------------------------
 # 6) ADD ELEMENTS TO THE MAP (Optimized for Streamlit)
