@@ -90,4 +90,3 @@ st.markdown(
     '<div class="footer">Developed by hoclz | Powered by Streamlit 🚀</div>',
     unsafe_allow_html=True
 )
-
