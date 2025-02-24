@@ -363,7 +363,7 @@ def plot_illinois_map():
     # Legends
     region_legend = ax.legend(
         handles=[Patch(facecolor=c, edgecolor='black', label=l) for l, c in region_colors.items()],
-        loc='upper left', bbox_to_anchor=(0.98, 0.90), title='Regions',
+        loc='upper left', bbox_to_anchor=(1.1, 0.90), title='Regions',
         fontsize=8, title_fontsize=10
     )
     ax.add_artist(region_legend)
