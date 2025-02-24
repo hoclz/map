@@ -4,20 +4,19 @@ from v9_main_map import plot_illinois_map
 # Set up the page configuration (using a wide layout)
 st.set_page_config(
     page_title="Illinois Asthma Hospitalization",
-    layout="wide",  # Using wide layout to get full horizontal space, but we will restrict the content width
+    layout="wide",  # We'll restrict the content width via CSS
     page_icon="📊"
 )
 
-# Custom CSS for better UI, including a max-width for the main container
+# Custom CSS using the new selector for the main container
 st.markdown(
     """
     <style>
-        /* Restrict the main content container to a max-width */
-        .reportview-container .main .block-container {
-            max-width: 200px;
+        /* Target the main container using data-testid attribute */
+        [data-testid="stAppViewContainer"] {
+            max-width: 800px;  /* Adjust this value to set your desired width */
             margin: 0 auto;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            padding: 1rem;
         }
         .title {
             text-align: center;
@@ -60,15 +59,14 @@ st.markdown(
 
 # Group dropdowns and map in one container for a tighter layout
 with st.container():
-    # Title and subtitle at the top of the container
+    # Title and subtitle at the top
     st.markdown('<p class="title">📊 Illinois Asthma Hospitalization Rates</p>', unsafe_allow_html=True)
     st.markdown('<p class="subtitle">Select Year & Race to View the Updated Map</p>', unsafe_allow_html=True)
     
     # Organize dropdowns in two columns
-    col1, col2 = st.columns([1, 1])
+    col1, col2 = st.columns(2)
     
     with col1:
-        # Convert to integer for the map function
         year = st.selectbox(
             "📅 Select Year",
             options=[2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
@@ -94,7 +92,7 @@ with st.container():
     except Exception as e:
         st.error(f"Error generating map: {str(e)}")
 
-# Footer (can remain outside the container)
+# Footer (outside the container)
 st.markdown(
     '<div class="footer">Developed by hoclz | Powered by Streamlit 🚀</div>',
     unsafe_allow_html=True
