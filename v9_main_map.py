@@ -414,7 +414,7 @@ def plot_illinois_map():
     )
 
     # Funnel diagram
-    draw_complete_diagram(ax, [0.64, 0.03, 0.15, 0.5])
+    draw_complete_diagram(ax, [0.66, 0.03, 0.15, 0.5])
 
     # Main title
     race_descriptions = {
