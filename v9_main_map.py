@@ -462,13 +462,17 @@ def plot_illinois_map(fig_width=14, fig_height=8):
     Generates and saves the Illinois asthma hospitalization map.
     """
     try:
+        # Ensure the required data is loaded
+        if illinois is None or illinois.empty:
+            st.error("❌ Illinois county data is missing or empty. Cannot generate the map.")
+            return None  # Return None if no valid data
+
+        if "color" not in illinois.columns:
+            st.error("❌ Region color information is missing. Ensure the dataset is correctly merged.")
+            return None
+
         # Create figure and axis
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-
-        # Ensure Illinois boundary is loaded
-        if illinois is None:
-            st.warning("⚠️ Illinois county data is missing. Cannot generate the map.")
-            return
 
         # Plot Illinois map with dynamic colors
         halo = unary_union(illinois.geometry).buffer(5000)
@@ -480,39 +484,56 @@ def plot_illinois_map(fig_width=14, fig_height=8):
 
         # Label counties and place marker for Urban vs Rural
         for idx, row in illinois.iterrows():
-            cx, cy = row.geometry.centroid.x, row.geometry.centroid.y
-            ax.text(cx, cy, row["name"], fontsize=6, ha='center', color='black')
-            marker_offset = 5000
-            if row["Urban_Rural"] == "Urban":
-                ax.scatter(cx, cy - marker_offset, color='teal', s=20, marker='o')
-            elif row["Urban_Rural"] == "Rural":
-                ax.scatter(cx, cy - marker_offset, color='magenta', s=40, marker='*')
+            if row.geometry and not row.geometry.is_empty:
+                cx, cy = row.geometry.centroid.x, row.geometry.centroid.y
+                ax.text(cx, cy, row["name"], fontsize=6, ha='center', color='black')
+
+                marker_offset = 5000
+                if "Urban_Rural" in row and pd.notna(row["Urban_Rural"]):
+                    if row["Urban_Rural"] == "Urban":
+                        ax.scatter(cx, cy - marker_offset, color='teal', s=20, marker='o')
+                    elif row["Urban_Rural"] == "Rural":
+                        ax.scatter(cx, cy - marker_offset, color='magenta', s=40, marker='*')
 
         # Add regional labels
-        for region_name, (x, y, label) in region_labels.items():
-            ax.text(
-                x, y, str(label),
-                fontsize=12, ha='center', va='center',
-                color='white', fontweight='bold',
-                path_effects=[withStroke(linewidth=3, foreground="black")]
-            )
+        if region_labels:
+            for region_name, (x, y, label) in region_labels.items():
+                ax.text(
+                    x, y, str(label),
+                    fontsize=12, ha='center', va='center',
+                    color='white', fontweight='bold',
+                    path_effects=[withStroke(linewidth=3, foreground="black")]
+                )
 
-        # Save the figure
+        # Ensure the static folder exists
         OUTPUT_FOLDER = "static/maps"
         if not os.path.exists(OUTPUT_FOLDER):
             os.makedirs(OUTPUT_FOLDER)
 
+        # Define file path for saved figure
         map_filename = f"{OUTPUT_FOLDER}/{PARAM_RACE}_{PARAM_YEAR}.png"
+
+        # Save the figure
         plt.savefig(map_filename, dpi=100, bbox_inches='tight')
         plt.close()  # Close figure to free memory
 
-        # Display the generated map
-        st.subheader(f"Generated Map for {PARAM_RACE.upper()} ({PARAM_YEAR})")
-        st.image(map_filename, caption=f"Asthma Rates for {PARAM_RACE.upper()}, {PARAM_YEAR}", use_column_width=True)
-        st.success(f"✅ Map successfully saved: `{map_filename}`")
+        # Verify if the map file was successfully saved
+        if os.path.exists(map_filename):
+            st.subheader(f"Generated Map for {PARAM_RACE.upper()} ({PARAM_YEAR})")
+            st.image(map_filename, caption=f"Asthma Rates for {PARAM_RACE.upper()}, {PARAM_YEAR}", use_column_width=True)
+            st.success(f"✅ Map successfully saved: `{map_filename}`")
+            return map_filename  # Return the map file path
+        else:
+            st.error("❌ Map generation failed. The file could not be saved.")
+            return None
 
     except Exception as e:
         st.error(f"❌ Error generating map: {e}")
+        return None
 
 # Run the function to generate and display the plot
-plot_illinois_map(fig_width=14, fig_height=8)
+map_generated = plot_illinois_map(fig_width=14, fig_height=8)
+
+if not map_generated:
+    st.warning("⚠️ No map found. Please check the dataset and try again.")
+
