@@ -380,9 +380,9 @@ def plot_illinois_map():
     )
 
     # Data table
-    table_ax = fig.add_axes([0.35, 0.38, 0.12, 0.4])
+    table_ax = fig.add_axes([0.30, 0.38, 0.12, 0.4])
     table_ax.axis("off")
-    tab = Table(table_ax, bbox=[0, 0, 1, 1])
+    tab = Table(table_ax, bbox=[1, 0, 1, 1])
     for i, row_data in enumerate(table_data):
         cell = tab.add_cell(
             i, 0, width=2.5, height=0.8,
